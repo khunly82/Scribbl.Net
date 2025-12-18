@@ -1,0 +1,38 @@
+﻿@page "/"
+
+<canvas @ref="canvas" 
+    height="600" 
+    width="800" 
+    style="border: 1px solid black"
+    @onmousedown="StartDraw"
+    @onmouseup="() => drawing = false"
+    @onmouseleave="() => drawing = false"
+    @onmousemove="Draw"
+></canvas>
+
+@code {
+    private ElementReference canvas;
+
+    private bool drawing = false;
+
+    private double fromX;
+    private double fromY;
+
+    [Inject]
+    public IJSRuntime JS { get; set; }
+
+    private void StartDraw(MouseEventArgs e)
+    {
+        drawing = true;
+        fromX = e.OffsetX;
+        fromY = e.OffsetY;
+    }
+
+    private void Draw(MouseEventArgs e)
+    {
+        if (!drawing) return;
+        JS.InvokeVoidAsync("drawLine", canvas, fromX, fromY, e.OffsetX, e.OffsetY, "hotpink", 3);
+        fromX = e.OffsetX;
+        fromY = e.OffsetY;
+    }
+}
