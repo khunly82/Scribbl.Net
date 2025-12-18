@@ -1,14 +1,49 @@
 ﻿@page "/"
 
-<canvas @ref="canvas" 
-    height="600" 
-    width="800" 
-    style="border: 1px solid black"
-    @onmousedown="StartDraw"
-    @onmouseup="() => drawing = false"
-    @onmouseleave="() => drawing = false"
-    @onmousemove="Draw"
-></canvas>
+<MudGrid Spacing="2">
+    <MudItem sm="12" md="3">
+        <MudCard>
+            <MudCardContent>
+                <MudColorPicker
+                    Label="Couleur"
+                    @bind-Text="color"
+                    PickerVariant="PickerVariant.Static"
+                    ShowColorField=false
+                    ></MudColorPicker>
+                <MudSelect Label="Epaisseur" @bind-Value="thickness">
+                    <MudSelectItem Value="@(1)">1</MudSelectItem>
+                    <MudSelectItem Value="@(2)">2</MudSelectItem>
+                    <MudSelectItem Value="@(3)">3</MudSelectItem>
+                    <MudSelectItem Value="@(4)">4</MudSelectItem>
+                    <MudSelectItem Value="@(5)">5</MudSelectItem>
+                </MudSelect>
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           @onclick="ClearCanvas"
+                >Effacer Tout</MudButton>
+            </MudCardActions>
+        </MudCard>
+    </MudItem>
+    <MudItem sm="12" md="7">
+        <canvas @ref="canvas"
+                height="600"
+                width="800"
+                style="border: 1px solid black"
+                @onmousedown="StartDraw"
+                @onmouseup="() => drawing = false"
+                @onmouseleave="() => drawing = false"
+                @onmousemove="Draw"></canvas>
+    </MudItem>
+    <MudItem sm="12" md="2">
+        <MudCard>
+            <MudCardContent></MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+
 
 @code {
     private ElementReference canvas;
@@ -17,6 +52,9 @@
 
     private double fromX;
     private double fromY;
+
+    private string color = "#000000";
+    private int thickness = 2;
 
     [Inject]
     public IJSRuntime JS { get; set; }
@@ -31,8 +69,13 @@
     private void Draw(MouseEventArgs e)
     {
         if (!drawing) return;
-        JS.InvokeVoidAsync("drawLine", canvas, fromX, fromY, e.OffsetX, e.OffsetY, "hotpink", 3);
+        JS.InvokeVoidAsync("drawLine", canvas, fromX, fromY, e.OffsetX, e.OffsetY, color, thickness);
         fromX = e.OffsetX;
         fromY = e.OffsetY;
+    }
+
+    public void ClearCanvas()
+    {
+        JS.InvokeVoidAsync("clearCanvas", canvas);
     }
 }

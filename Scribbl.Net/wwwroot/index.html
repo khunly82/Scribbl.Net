@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-            *           * <meta charset="utf-8" />
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>Scribbl.Net</title>
     <base href="/" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+    <link href="_content/MudBlazor/MudBlazor.min.css?v=@(MudBlazor.Metadata.Version)" rel="stylesheet" />
+
     <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
     <link rel="stylesheet" href="css/app.css" />
     <link rel="stylesheet" href="Scribbl.Net.styles.css" />
@@ -24,18 +27,18 @@
     </div>
 
 
+    <script src="_content/MudBlazor/MudBlazor.min.js?v=@(MudBlazor.Metadata.Version)"></script>
     <script src="_framework/blazor.webview.js" autostart="false"></script>
 
 
     <script>
 
         /**
-        *@var canvas { HTMLCanvasElement } 
+        *@var canvas { HTMLCanvasElement }
         */
         // const canvas = document.querySelector('canvas');
 
         function drawLine(canvas, fromX, fromY, toX, toY, color, lineWidth) {
-            console.log(canvas)
             const ctx = canvas.getContext('2d');
             ctx.beginPath();
             ctx.strokeStyle = color;
@@ -46,6 +49,11 @@
         }
 
         // drawLine(canvas, 0,0,666,12, 'red', 9)
+
+        function clearCanvas(canvas) {
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
 
     </script>
 
