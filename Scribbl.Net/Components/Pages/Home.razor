@@ -34,8 +34,8 @@
                 width="800"
                 style="border: 1px solid black"
                 @onmousedown="StartDraw"
-                @onmouseup="() => drawing = false"
-                @onmouseleave="() => drawing = false"
+                @onmouseup="EndDraw"
+                @onmouseleave="EndDraw"
                 @onmousemove="Draw"></canvas>
     </MudItem>
     <MudItem sm="12" md="2">
@@ -58,17 +58,19 @@
     private string color = "#000000";
     private int thickness = 2;
 
+    private List<Line> lastSequence = [];
+
     [Inject]
     public IJSRuntime JS { get; set; }
 
     private HubConnection connection;
 
-    protected async override Task OnInitializedAsync()
+    protected async override Task OnAfterRenderAsync(bool firstRender)
     {
+        if (!firstRender) return;
         HubConnectionBuilder builder = new();
         builder.WithUrl("http://10.10.10.2:8838/ws/game");
         connection = builder.Build();
-        await connection.StartAsync();
         connection.On<Line>("DrawLine", l =>
         {
             // 4
@@ -82,6 +84,16 @@
         {
             JS.InvokeVoidAsync("clearCanvas", canvas);
         });
+
+        connection.On<List<List<Line>>>("Redraw", async p =>
+        {
+            await JS.InvokeVoidAsync("clearCanvas", canvas);
+            foreach (Line l in p.SelectMany(li => li))
+            {
+                await JS.InvokeVoidAsync("drawLine", canvas, l.FromX, l.FromY, l.ToX, l.ToY, l.Color, l.Thickness);
+            }
+        });
+        await connection.StartAsync();
     }
 
     private void StartDraw(MouseEventArgs e)
@@ -99,7 +111,7 @@
         JS.InvokeVoidAsync("drawLine", canvas, fromX, fromY, e.OffsetX, e.OffsetY, color, thickness);
 
         // 2
-        connection.SendAsync("DrawLine", new Line
+        lastSequence.Add(new Line
         {
             FromX = fromX,
             FromY = fromY,
@@ -108,6 +120,7 @@
             Color = color,
             Thickness = thickness,
         });
+        connection.SendAsync("DrawLine", lastSequence[^1]);
         fromX = e.OffsetX;
         fromY = e.OffsetY;
     }
@@ -118,5 +131,12 @@
         JS.InvokeVoidAsync("clearCanvas", canvas);
         // 2
         connection.SendAsync("ClearCanvas");
+    }
+
+    public void EndDraw()
+    {
+        drawing = false;
+        connection.SendAsync("SendSequence", lastSequence);
+        lastSequence.Clear();
     }
 }
