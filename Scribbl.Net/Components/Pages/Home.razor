@@ -43,7 +43,11 @@
     </MudItem>
     <MudItem sm="12" md="2">
         <MudCard>
-            <MudCardContent></MudCardContent>
+            <MudCardContent>
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           @onclick="PickWord">Choisir un nouveau mot</MudButton>
+            </MudCardContent>
         </MudCard>
     </MudItem>
 </MudGrid>
@@ -96,6 +100,12 @@
                 await JS.InvokeVoidAsync("drawLine", canvas, l.FromX, l.FromY, l.ToX, l.ToY, l.Color, l.Thickness);
             }
         });
+
+        connection.On<string>("NewWord", async w =>
+        {
+            await JS.InvokeVoidAsync("alert", w);
+        });
+
         await connection.StartAsync();
     }
 
@@ -149,5 +159,10 @@
     public void Back()
     {
         connection.SendAsync("Back");
+    }
+
+    public void PickWord()
+    {
+        connection.SendAsync("PickWord");
     }
 }
