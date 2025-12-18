@@ -1,4 +1,6 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.SignalR.Client
+@using Scribbl.Net.Models
 
 <MudGrid Spacing="2">
     <MudItem sm="12" md="3">
@@ -59,6 +61,29 @@
     [Inject]
     public IJSRuntime JS { get; set; }
 
+    private HubConnection connection;
+
+    protected async override Task OnInitializedAsync()
+    {
+        HubConnectionBuilder builder = new();
+        builder.WithUrl("http://10.10.10.2:8838/ws/game");
+        connection = builder.Build();
+        await connection.StartAsync();
+        connection.On<Line>("DrawLine", l =>
+        {
+            // 4
+            // lorsque un autre user ajoute un trait
+            // qu'est que je fais ?
+            JS.InvokeVoidAsync("drawLine", canvas, l.FromX, l.FromY, l.ToX, l.ToY, l.Color, l.Thickness);
+
+        });
+
+        connection.On("ClearCanvas", () =>
+        {
+            JS.InvokeVoidAsync("clearCanvas", canvas);
+        });
+    }
+
     private void StartDraw(MouseEventArgs e)
     {
         drawing = true;
@@ -69,13 +94,29 @@
     private void Draw(MouseEventArgs e)
     {
         if (!drawing) return;
+
+        // 1
         JS.InvokeVoidAsync("drawLine", canvas, fromX, fromY, e.OffsetX, e.OffsetY, color, thickness);
+
+        // 2
+        connection.SendAsync("DrawLine", new Line
+        {
+            FromX = fromX,
+            FromY = fromY,
+            ToX = e.OffsetX,
+            ToY = e.OffsetY,
+            Color = color,
+            Thickness = thickness,
+        });
         fromX = e.OffsetX;
         fromY = e.OffsetY;
     }
 
     public void ClearCanvas()
     {
+        // 1
         JS.InvokeVoidAsync("clearCanvas", canvas);
+        // 2
+        connection.SendAsync("ClearCanvas");
     }
 }
