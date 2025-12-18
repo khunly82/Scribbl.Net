@@ -25,6 +25,9 @@
                            Color="Color.Primary"
                            @onclick="ClearCanvas"
                 >Effacer Tout</MudButton>
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           @onclick="Back">Retour en arrière</MudButton>
             </MudCardActions>
         </MudCard>
     </MudItem>
@@ -136,7 +139,15 @@
     public void EndDraw()
     {
         drawing = false;
-        connection.SendAsync("SendSequence", lastSequence);
-        lastSequence.Clear();
+        if(lastSequence.Any())
+        {
+            connection.SendAsync("SendSequence", lastSequence);
+            lastSequence.Clear();
+        }
+    }
+
+    public void Back()
+    {
+        connection.SendAsync("Back");
     }
 }
