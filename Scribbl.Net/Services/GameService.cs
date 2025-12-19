@@ -66,5 +66,10 @@ namespace Scribbl.Net.Services
             Picture.Add(sequence);
             hubConnection.SendAsync("SendSequence", sequence);
         }
+
+        public void PickWord()
+        {
+            hubConnection.SendAsync("PickWord");
+        }
     }
 }

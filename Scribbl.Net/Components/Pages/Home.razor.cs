@@ -103,7 +103,7 @@ namespace Scribbl.Net.Components.Pages
 
         public void PickWord()
         {
-            //connection.SendAsync("PickWord");
+            GameService.PickWord();
         }
 
 
