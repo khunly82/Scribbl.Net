@@ -1,14 +1,15 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.JSInterop;
 using Scribbl.Net.Models;
 
 namespace Scribbl.Net.Services
 {
-    public class GameService
+    public class GameService(IJSRuntime JS)
     {
         private HubConnection hubConnection
             = new HubConnectionBuilder()
                 .WithAutomaticReconnect()
-                .WithUrl("http://10.10.23.45:8838/ws/game").Build();
+                .WithUrl("http://10.10.23.45:8838/ws/game?user=Khun").Build();
 
         public event Action? OnPictureDelete;
         public event Action<Line>? OnPictureUpdate;
@@ -39,7 +40,7 @@ namespace Scribbl.Net.Services
 
             hubConnection.On<string>("NewWord", async w =>
             {
-                //await JS.InvokeVoidAsync("alert", w);
+                await JS.InvokeVoidAsync("alert", w);
             });
 
             hubConnection.StartAsync();
