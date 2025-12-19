@@ -22,31 +22,26 @@ namespace Scribbl.Net.Components.Pages
         private List<Line> lastSequence = [];
 
         [Inject]
-        public IJSRuntime JS { get; set; }
+        public IJSRuntime JS { get; set; } = null!;
 
         [Inject]
-        private GameService gameService { get; set; }
+        private GameService GameService { get; set; } = null!;
 
         protected override void OnAfterRender(bool firstRender)
         {
             if (!firstRender) return;
 
+            // nécessaire pour afficher l'image au chargement du composant
+            JS.RedrawImage(GameService.Picture.SelectMany(x => x).ToList(), canvas);
             
-            gameService.OnPictureUpdate += l =>
+            GameService.OnPictureUpdate += l =>
             {
                 JS.DrawLine(canvas, l.FromX, l.FromY, l.ToX, l.ToY, l.Color, l.Thickness);
             };
 
-            gameService.OnPictureDelete += JS.ClearCanvas;
+            GameService.OnPictureDelete += () => JS.ClearCanvas(canvas);
 
-            gameService.OnPictureRedraw += p =>
-            {
-                JS.ClearCanvas();
-                foreach (Line l in p)
-                {
-                    JS.DrawLine(canvas, l.FromX, l.FromY, l.ToX, l.ToY, l.Color, l.Thickness);
-                }
-            };
+            GameService.OnPictureRedraw += p => JS.RedrawImage(p, canvas);
 
             //connection.On<string>("NewWord", async w =>
             //{
@@ -80,15 +75,15 @@ namespace Scribbl.Net.Components.Pages
                 Color = color,
                 Thickness = thickness,
             });
-            gameService.DrawLine(lastSequence[^1]);
+            GameService.DrawLine(lastSequence[^1]);
             fromX = e.OffsetX;
             fromY = e.OffsetY;
         }
 
         public void ClearCanvas()
         {
-            JS.ClearCanvas();
-            gameService.ClearCanvas();
+            JS.ClearCanvas(canvas);
+            GameService.ClearCanvas();
         }
 
         public void EndDraw()
@@ -96,19 +91,22 @@ namespace Scribbl.Net.Components.Pages
             drawing = false;
             if (lastSequence.Any())
             {
-                gameService.SendSequence(lastSequence);
+                GameService.SendSequence(lastSequence);
                 lastSequence.Clear();
             }
         }
 
         public void Back()
         {
-            gameService.Back();
+            GameService.Back();
         }
 
         public void PickWord()
         {
             //connection.SendAsync("PickWord");
         }
+
+
+        
     }
 }

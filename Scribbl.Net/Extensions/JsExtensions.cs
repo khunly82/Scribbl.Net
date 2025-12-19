@@ -1,10 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Scribbl.Net.Models;
 
 namespace Scribbl.Net.Extensions
 {
@@ -23,9 +19,18 @@ namespace Scribbl.Net.Extensions
             js.InvokeVoidAsync("drawLine", canvas, fromX, fromY, toX, toY, color, thickness);
         }
 
-        public static void ClearCanvas(this IJSRuntime js)
+        public static void ClearCanvas(this IJSRuntime js, ElementReference canvas)
         {
-            js.InvokeVoidAsync("clearCanvas");
+            js.InvokeVoidAsync("clearCanvas", canvas);
+        }
+
+        public static void RedrawImage(this IJSRuntime js, List<Line> p, ElementReference canvas)
+        {
+            js.ClearCanvas(canvas);
+            foreach (Line l in p)
+            {
+                js.DrawLine(canvas, l.FromX, l.FromY, l.ToX, l.ToY, l.Color, l.Thickness);
+            }
         }
     }
 }

@@ -1,11 +1,5 @@
-﻿using Android.Graphics;
-using Microsoft.AspNetCore.SignalR.Client;
+﻿using Microsoft.AspNetCore.SignalR.Client;
 using Scribbl.Net.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Scribbl.Net.Services
 {
@@ -20,6 +14,8 @@ namespace Scribbl.Net.Services
         public event Action<Line>? OnPictureUpdate;
         public event Action<List<Line>>? OnPictureRedraw;
 
+        public List<List<Line>> Picture { get; private set; } = [];
+
 
         public GameService()
         {
@@ -31,11 +27,13 @@ namespace Scribbl.Net.Services
 
             hubConnection.On("ClearCanvas", () =>
             {
+                Picture.Clear();
                 OnPictureDelete?.Invoke();
             });
 
             hubConnection.On<List<List<Line>>>("Redraw", (p) =>
             {
+                Picture = p;
                 OnPictureRedraw?.Invoke(p.SelectMany(x => x).ToList());
             });
 
@@ -64,6 +62,7 @@ namespace Scribbl.Net.Services
 
         public void SendSequence(List<Line> sequence)
         {
+            Picture.Add(sequence);
             hubConnection.SendAsync("SendSequence", sequence);
         }
     }
