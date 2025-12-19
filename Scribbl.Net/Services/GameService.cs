@@ -4,7 +4,7 @@ using Scribbl.Net.Models;
 
 namespace Scribbl.Net.Services
 {
-    public class GameService(IJSRuntime JS)
+    public class GameService
     {
         private HubConnection hubConnection
             = new HubConnectionBuilder()
@@ -18,7 +18,7 @@ namespace Scribbl.Net.Services
         public List<List<Line>> Picture { get; private set; } = [];
 
 
-        public GameService()
+        public GameService(IJSRuntime JS)
         {
 
             hubConnection.On<Line>("DrawLine", l =>
