@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using MudBlazor.Services;
+using Scribbl.Net.Services;
 
 namespace Scribbl.Net
 {
@@ -17,6 +18,7 @@ namespace Scribbl.Net
 
             builder.Services.AddMauiBlazorWebView();
             builder.Services.AddMudServices();
+            builder.Services.AddSingleton<GameService>();
 
 #if DEBUG
     		builder.Services.AddBlazorWebViewDeveloperTools();
